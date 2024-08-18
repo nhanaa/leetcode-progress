@@ -4,7 +4,6 @@ from account import Account
 import database
 import smtplib
 from email.message import EmailMessage
-import datetime
 import os
 from dotenv import load_dotenv
 
@@ -53,21 +52,18 @@ def compare_stats_and_send_email(prevAcc: Account, currAcc: Account):
   msg = EmailMessage()
   msg["Subject"] = "Progress for yesterday"
   msg["From"] = email_address
-  msg["To"] = "nhanprotp@gmail.com"
+  msg["To"] = email_recipent
 
-  if (prevAcc.total == currAcc.total):
-    msg.set_content("No additional question was done. Must be punished!!!")
-  else:
-    easyDone = currAcc.easy - prevAcc.easy
-    mediumDone = currAcc.medium - prevAcc.medium
-    hardDone = currAcc.hard - prevAcc.hard
+  easyDone = currAcc.easy - prevAcc.easy
+  mediumDone = currAcc.medium - prevAcc.medium
+  hardDone = currAcc.hard - prevAcc.hard
 
-    msg.set_content(f"Progress!!!\nEasy Done = {easyDone}\nMedium Done = {mediumDone}\nHard Done = {hardDone}")
+  msg.set_content(f"Progress!!!\nEasy Done = {easyDone}\nMedium Done = {mediumDone}\nHard Done = {hardDone}")
 
   # Send email
-  with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-    smtp.login(email_address, email_password)
-    smtp.send_message(msg)
+  # with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+  #   smtp.login(email_address, email_password)
+  #   smtp.send_message(msg)
 
   print("Email sent")
 
