@@ -4,7 +4,6 @@ from account import Account
 import database
 import smtplib
 from email.message import EmailMessage
-import datetime
 import os
 from dotenv import load_dotenv
 
@@ -35,11 +34,8 @@ def get_info(username):
   query = get_query(username)
   print(query)
   res = requests.post(url, json={"query": get_query(username)})
-  print("Status Code " + str(res.status_code))
 
   json_data = json.loads(res.text)
-
-  print(json_data)
 
   return json_data
 
@@ -47,25 +43,24 @@ def get_info(username):
 def compare_stats_and_send_email(prevAcc: Account, currAcc: Account):
   email_address = os.environ.get("EMAIL_ADDRESS")
   email_password = os.environ.get("EMAIL_PASSWORD")
-  email_recipent = os.environ.get("RECIPENT_EMAIL")
+  email_recipient = os.environ.get("EMAIL_TARGET")
+
+  print(email_address, email_password, email_recipient)
 
   # Create the email
   msg = EmailMessage()
-  msg["Subject"] = "Progress for yesterday"
+  msg["Subject"] = f"{currAcc.username}'s leetcode progress for yesterday"
   msg["From"] = email_address
-  msg["To"] = "nhanprotp@gmail.com"
+  msg["To"] = email_recipient
 
-  if (prevAcc.total == currAcc.total):
-    msg.set_content("No additional question was done. Must be punished!!!")
-  else:
-    easyDone = currAcc.easy - prevAcc.easy
-    mediumDone = currAcc.medium - prevAcc.medium
-    hardDone = currAcc.hard - prevAcc.hard
+  easyDone = currAcc.easy - prevAcc.easy
+  mediumDone = currAcc.medium - prevAcc.medium
+  hardDone = currAcc.hard - prevAcc.hard
 
-    msg.set_content(f"Progress!!!\nEasy Done = {easyDone}\nMedium Done = {mediumDone}\nHard Done = {hardDone}")
+  msg.set_content(f"Progress!!!\nEasy Done = {easyDone}\nMedium Done = {mediumDone}\nHard Done = {hardDone}")
 
   # Send email
-  with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+  with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
     smtp.login(email_address, email_password)
     smtp.send_message(msg)
 
@@ -75,7 +70,6 @@ def compare_stats_and_send_email(prevAcc: Account, currAcc: Account):
 def main():
   username = os.environ.get("USERNAME")
   data = get_info(username)["data"]["matchedUser"]["submitStats"]["acSubmissionNum"]
-  print(data)
 
   easyCount = data[1]["count"]
   mediumCount = data[2]["count"]
@@ -83,24 +77,14 @@ def main():
 
   currAcc = Account(username, easyCount, mediumCount, hardCount)
 
-  print(easyCount, mediumCount, hardCount)
+  prevAcc = database.get_account(username)
 
-  dbConnection = database.connect_database("lc.db")
+  if prevAcc:
+    compare_stats_and_send_email(prevAcc, currAcc)
+    database.update_account(currAcc)
+  else:
+    database.insert_account(currAcc)
 
-  database.create_table(dbConnection)
-
-  cursor = database.get_account(dbConnection, username)
-
-  # If account does not exist
-  if not cursor:
-    print("No such account in db")
-    database.insert_account(dbConnection, currAcc)
-
-  prevAcc = None
-  for row in cursor:
-    prevAcc = Account(username, row[0], row[1], row[2])
-
-  compare_stats_and_send_email(prevAcc, currAcc)
 
 if __name__ == "__main__":
   main()
