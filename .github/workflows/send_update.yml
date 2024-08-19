@@ -2,7 +2,7 @@ name: Send Daily Update
 
 on:
   schedule:
-    - cron: '51 2 * * *'
+    - cron: '0 14 * * *' # 14:00 UTC = 9:00 AM CST
   workflow_dispatch:
 
 jobs:
