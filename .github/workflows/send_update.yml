@@ -12,7 +12,7 @@ jobs:
       USERNAME: ${{ secrets.USERNAME }}
       EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
       EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-      EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+      EMAIL_TARGET: ${{ secrets.EMAIL_TARGET }}
 
     runs-on: ubuntu-latest
 
