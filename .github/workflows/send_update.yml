@@ -1,8 +1,10 @@
 name: Send Daily Update
 
 on:
-  schedule:
-    - cron: '0 14 * * *' # 2pm UTC/9am EST
+  push:
+    branches:
+      - "**"
+      - "!main"
 
 jobs:
   send_update:
