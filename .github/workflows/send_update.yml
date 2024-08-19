@@ -2,7 +2,7 @@ name: Send Daily Update
 
 on:
   schedule:
-    - cron: '35 2 * * *' # 2:35 AM UTC
+    - cron: '43 2 * * *'
 
 jobs:
   send_update:
